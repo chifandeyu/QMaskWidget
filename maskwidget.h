@@ -49,6 +49,8 @@ protected:
     virtual void resizeEvent(QResizeEvent* event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *e) override;
+    virtual void mouseMoveEvent(QMouseEvent* e) override;
+    virtual void mouseReleaseEvent(QMouseEvent* e) override;
 
 //private:
 public:
@@ -59,6 +61,7 @@ signals:
     void sigClicked(QWidget*);
 
 private:
+    QPoint m_clickPos;
     static MaskWidget* m_pMask;
     QWidget* m_pDlgToBeMasked = nullptr;
     //QStringList m_lstNamesForDlgPrompt;

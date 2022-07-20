@@ -6,8 +6,6 @@
 #include <QDebug>
 #include <QTimer>
 
-const int MinY = 26;
-
 //MaskWidget* MaskWidget::m_pMask = nullptr;
 
 //MaskWidget *MaskWidget::GetInstance()
@@ -60,7 +58,7 @@ void MaskWidget::SetOpacity(float fOpacity)
 
 void MaskWidget::SetClickMaskHide(bool bClickMaskHide)
 {
-    m_bClickMaskHide = bClickMaskHide;
+
 }
 
 void MaskWidget::paintEvent(QPaintEvent *event)
@@ -143,7 +141,20 @@ bool MaskWidget::eventFilter(QObject *obj, QEvent *event)
 
 void MaskWidget::mousePressEvent(QMouseEvent *e)
 {
-    if(m_pDlgToBeMasked && m_pDlgToBeMasked->isVisible())
+    m_clickPos = QCursor::pos();
+    QWidget::mousePressEvent(e);
+}
+
+void MaskWidget::mouseMoveEvent(QMouseEvent* e)
+{
+    return QWidget::mouseMoveEvent(e);
+}
+
+void MaskWidget::mouseReleaseEvent(QMouseEvent* e)
+{
+    QPoint pt = QCursor::pos();
+    bool hasMove = (qAbs(m_clickPos.x()- pt.x()) < 10 && qAbs(m_clickPos.y() - pt.y()) < 10);
+    if (hasMove && m_pDlgToBeMasked && m_pDlgToBeMasked->isVisible())
     {
         for (auto iter = m_dialogMap.begin(); iter != m_dialogMap.end(); iter++)
         {
@@ -153,7 +164,6 @@ void MaskWidget::mousePressEvent(QMouseEvent *e)
             }
             QPoint startPt = widget->mapToGlobal(QPoint(0, 0));
             const QRect& bgGlobalRect = QRect(startPt, QPoint(startPt.x() + widget->width(), startPt.y() + widget->height()));
-            QPoint pt = QCursor::pos();
             if (!bgGlobalRect.contains(pt))
             {
                 qInfo() << "click mask rect";
@@ -165,7 +175,7 @@ void MaskWidget::mousePressEvent(QMouseEvent *e)
             }
         }
     }
-    QWidget::mousePressEvent(e);
+    return QWidget::mouseReleaseEvent(e);
 }
 
 MaskWidget::MaskWidget(QWidget *parent)
@@ -187,9 +197,6 @@ MaskWidget::MaskWidget(QWidget *parent)
             QRect maskRect = this->geometry();
             int posX = (maskRect.right() - widget->width()) / 2;
             int posY = (maskRect.bottom() - widget->height()) / 2;
-            if(posY < maskRect.top() + MinY){
-                posY = maskRect.top() + MinY;
-            }
             widget->move(posX, posY);
         }
     });
